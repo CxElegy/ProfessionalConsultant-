@@ -1,115 +1,89 @@
-/* 学習コース */
+/* 学習リソース：外部学習サイトへの案内と学習記録 */
 (function () {
   "use strict";
-  const C = window.DOJO_COURSE;
+  const R = window.DOJO_RESOURCES;
   const $ = (s, el = document) => el.querySelector(s);
-  const KEY = "consultant-dojo-learn-v1";
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const KEY = "consultant-dojo-resources-v1";
   let mem = {};
   let prog;
   try { prog = JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { prog = mem; }
-  prog = Object.assign({ done: {}, answers: {}, last: null }, prog);
+  prog = Object.assign({ done: {}, notes: {} }, prog);
   const save = () => { mem = prog; try { localStorage.setItem(KEY, JSON.stringify(prog)); } catch (e) { /* ignore */ } };
+  const today = () => new Date().toLocaleDateString("sv-SE");
 
-  const all = C.flatMap((m) => m.lessons.map((l) => Object.assign({ module: m }, l)));
-  const find = (id) => all.find((l) => l.id === id);
-  const doneCount = (m) => (m ? m.lessons : all).filter((l) => prog.done[l.id]).length;
-  const nextLesson = () => all.find((l) => !prog.done[l.id]) || null;
+  const all = R.flatMap((g) => g.items.map((it) => Object.assign({ group: g }, it)));
+  const doneCount = (g) => (g ? g.items : all).filter((it) => prog.done[it.id]).length;
+  const nextItem = () => all.find((it) => !prog.done[it.id]) || null;
 
-  // ホーム等から使う
   window.DojoLearn = {
-    summary() { return { done: doneCount(), total: all.length, next: nextLesson() }; },
+    summary() { return { done: doneCount(), total: all.length, next: nextItem() }; },
     doneDates() { return Object.values(prog.done); },
     data() { return prog; },
-    reset() { prog = { done: {}, answers: {}, last: null }; save(); }
+    reset() { prog = { done: {}, notes: {} }; save(); }
   };
 
-  function bar(n, total) { return `<div class="progress"><span style="width:${total ? (n / total) * 100 : 0}%"></span></div>`; }
+  let filter = "all";
+  const bar = (n, t) => `<div class="progress"><span style="width:${t ? (n / t) * 100 : 0}%"></span></div>`;
 
-  function renderIndex() {
-    const n = doneCount(), next = nextLesson();
-    $("#learn-root").innerHTML = `
-      <h1 class="page-title">学習コース</h1>
-      <p class="lead">6つのモジュール・${all.length}レッスンで、コンサルタントの基礎を体系的に学びます。1レッスン5〜7分。読む → 確認問題 → 今日の実践、の順で進めましょう。</p>
-      <div class="card course-summary">
-        <div class="card-head"><h2>全体の進捗</h2><span class="muted">${n} / ${all.length} レッスン完了</span></div>
-        ${bar(n, all.length)}
-        ${next ? `<a class="btn" href="#learn/${next.id}">${n ? "続きから学ぶ" : "最初のレッスンを始める"}：${next.title}</a>` : `<p><b>全レッスン修了です！</b> 実践タブで繰り返し使い、型を体に染み込ませましょう。</p>`}
+  function card(it) {
+    const done = !!prog.done[it.id];
+    return `<li class="res ${done ? "done" : ""}">
+      <div class="res-main">
+        <a class="res-title" href="${esc(it.url)}" target="_blank" rel="noopener noreferrer">${esc(it.title)}<span class="ext" aria-hidden="true"> ↗</span><span class="sr-only">（新しいタブで開く）</span></a>
+        <p class="res-meta small"><span>${esc(it.site)}</span>
+          <span class="tag">${it.lang === "en" ? "英語" : "日本語"}</span>
+          ${it.cost ? `<span class="tag cost">${esc(it.cost)}</span>` : `<span class="tag muted-tag">料金は公式で確認</span>`}</p>
+        <p class="small res-use">${esc(it.use)}</p>
+        <details ${prog.notes[it.id] ? "open" : ""}><summary class="small">学んだことメモ</summary>
+          <textarea rows="2" data-note="${it.id}" placeholder="学んだこと・仕事で試すことを1行で">${esc(prog.notes[it.id] || "")}</textarea></details>
       </div>
-      <div class="module-grid">
-        ${C.map((m, mi) => {
-          const d = doneCount(m);
-          return `<article class="card module">
-            <p class="eyebrow">MODULE ${mi + 1}</p>
-            <h2>${m.title}</h2>
-            <p class="muted small">${m.desc}</p>
-            ${bar(d, m.lessons.length)}
-            <ol class="lesson-list">
-              ${m.lessons.map((l) => `<li class="${prog.done[l.id] ? "done" : ""}"><a href="#learn/${l.id}"><span class="check" aria-hidden="true">${prog.done[l.id] ? "✓" : ""}</span><span>${l.title}</span></a><span class="pill">${l.min}分</span></li>`).join("")}
-            </ol>
-          </article>`;
-        }).join("")}
-      </div>`;
+      <label class="res-check"><input type="checkbox" data-done="${it.id}" ${done ? "checked" : ""}><span class="small">学習済み</span></label>
+    </li>`;
   }
 
-  function renderLesson(id) {
-    const l = find(id);
-    if (!l) { renderIndex(); return; }
-    prog.last = id; save();
-    const m = l.module, idx = all.indexOf(l), prev = all[idx - 1], next = all[idx + 1];
-    const li = m.lessons.findIndex((x) => x.id === l.id) + 1;
-    const answered = prog.answers[id];
+  function render() {
+    const n = doneCount(), next = nextItem();
+    const groups = R.filter((g) => filter === "all" || g.id === filter);
     $("#learn-root").innerHTML = `
-      <nav class="crumbs small"><a href="#learn">学習コース</a> / ${m.title}</nav>
-      <article class="card lesson">
-        <p class="eyebrow">MODULE ${C.indexOf(m) + 1} ・ LESSON ${li} / ${m.lessons.length} ・ ${l.min}分</p>
-        <h1 class="lesson-title">${l.title}</h1>
-        ${l.body.map((p) => `<p>${p}</p>`).join("")}
-        <div class="keypoints"><h3>ポイント</h3><ul>${l.points.map((p) => `<li>${p}</li>`).join("")}</ul></div>
-        <div class="example"><h3>${l.example.title}</h3><p>${l.example.text}</p></div>
-        <section class="lesson-check">
-          <h3>確認問題</h3>
-          <p class="quiz-q">${l.check.q}</p>
-          <div class="choices">${l.check.choices.map((c, k) => `<button class="choice" data-k="${k}">${c}</button>`).join("")}</div>
-          <div id="lesson-why"></div>
-        </section>
-        <div class="action"><h3>今日の実践</h3><p>${l.action}</p></div>
-        <div class="row lesson-foot">
-          <button class="btn" id="lesson-done">${prog.done[id] ? "完了済み ✓（取り消す）" : "このレッスンを完了にする"}</button>
-          <span class="spacer"></span>
-          ${prev ? `<a class="btn ghost" href="#learn/${prev.id}">← 前へ</a>` : ""}
-          ${next ? `<a class="btn ghost" href="#learn/${next.id}">次へ →</a>` : `<a class="btn ghost" href="#learn">一覧へ</a>`}
-        </div>
-      </article>`;
-
-    const showAnswer = (k) => {
-      document.querySelectorAll("#learn-root .choice").forEach((b) => {
-        b.disabled = true;
-        if (+b.dataset.k === l.check.a) b.classList.add("correct");
-        else if (+b.dataset.k === k) b.classList.add("wrong");
-      });
-      $("#lesson-why").innerHTML = `<div class="model"><p><b>${k === l.check.a ? "正解！" : "不正解"}</b> ${l.check.why}</p></div>`;
-    };
-    if (answered !== undefined) showAnswer(answered);
-    $(".lesson-check .choices").addEventListener("click", (e) => {
-      const b = e.target.closest(".choice"); if (!b || b.disabled) return;
-      const k = +b.dataset.k; prog.answers[id] = k;
-      if (k === l.check.a && !prog.done[id]) prog.done[id] = new Date().toLocaleDateString("sv-SE");
-      save(); showAnswer(k);
-      $("#lesson-done").textContent = prog.done[id] ? "完了済み ✓（取り消す）" : "このレッスンを完了にする";
-    });
-    $("#lesson-done").addEventListener("click", () => {
-      if (prog.done[id]) delete prog.done[id]; else prog.done[id] = new Date().toLocaleDateString("sv-SE");
-      save();
-      if (prog.done[id] && next) location.hash = `#learn/${next.id}`; else renderLesson(id);
-    });
+      <h1 class="page-title">学習リソース</h1>
+      <p class="lead">学習は、信頼できる外部の学習サイトで行います。ここではテーマ別におすすめのサイトを案内し、どこまで学んだかを記録します。リンクは新しいタブで開きます。</p>
+      <div class="card course-summary">
+        <div class="card-head"><h2>学習の進捗</h2><span class="muted">${n} / ${all.length} 件 学習済み</span></div>
+        ${bar(n, all.length)}
+        ${next ? `<p class="small muted next-label">次のおすすめ</p><a class="next-link" href="${esc(next.url)}" target="_blank" rel="noopener noreferrer">${esc(next.title)} <span class="muted small">— ${esc(next.site)}</span> ↗</a>` : `<p><b>すべて学習済みです。</b> 演習タブで実際に使い、型を身につけましょう。</p>`}
+      </div>
+      <div class="filters">
+        <button class="chip ${filter === "all" ? "on" : ""}" data-f="all">すべて</button>
+        ${R.map((g) => `<button class="chip ${filter === g.id ? "on" : ""}" data-f="${g.id}">${esc(g.title)}</button>`).join("")}
+      </div>
+      ${groups.map((g) => `
+        <section class="card res-group">
+          <div class="card-head"><h2>${esc(g.title)}</h2><span class="muted small">${doneCount(g)} / ${g.items.length}</span></div>
+          <p class="muted small">${esc(g.desc)}</p>
+          ${bar(doneCount(g), g.items.length)}
+          <ul class="res-list">${g.items.map(card).join("")}</ul>
+        </section>`).join("")}
+      <p class="small muted">各リンク先の内容・料金・公開状況は、運営元の判断で変わることがあります（2026年11月時点で掲載を確認）。</p>`;
   }
 
-  function route() {
-    const h = location.hash.slice(1);
-    if (!h.startsWith("learn")) return;
-    const id = h.split("/")[1];
-    id ? renderLesson(id) : renderIndex();
-  }
-  window.addEventListener("hashchange", route);
-  route();
+  document.addEventListener("click", (e) => {
+    const f = e.target.closest("#learn-root [data-f]");
+    if (f) { filter = f.dataset.f; render(); }
+  });
+  document.addEventListener("change", (e) => {
+    const id = e.target.dataset && e.target.dataset.done;
+    if (!id) return;
+    if (e.target.checked) prog.done[id] = today(); else delete prog.done[id];
+    save(); render();
+  });
+  document.addEventListener("input", (e) => {
+    const id = e.target.dataset && e.target.dataset.note;
+    if (!id) return;
+    const v = e.target.value.trim();
+    if (v) prog.notes[id] = v; else delete prog.notes[id];
+    save();
+  });
+
+  render();
 })();

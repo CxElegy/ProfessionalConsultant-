@@ -66,7 +66,7 @@
     const stats = [
       ["連続日数", streak(), "日"],
       ["スキル平均", avg, lastA ? "/ 5" : ""],
-      ["学習コース", window.DojoLearn ? window.DojoLearn.summary().done : 0, window.DojoLearn ? "/ " + window.DojoLearn.summary().total : ""],
+      ["学習済み", window.DojoLearn ? window.DojoLearn.summary().done : 0, window.DojoLearn ? "/ " + window.DojoLearn.summary().total : ""],
       ["クイズ最高", quizBest === null ? "—" : quizBest, quizBest === null ? "" : "/ 10"]
     ];
     $("#home-stats").innerHTML = stats.map(([l, v, u]) => `<div class="stat"><span class="stat-label">${l}</span><span class="stat-value">${v}<small>${u}</small></span></div>`).join("");
@@ -84,7 +84,7 @@
       ["KPTで今日の仕事を振り返る", "#habits", "3分"]
     ];
     const L = window.DojoLearn && window.DojoLearn.summary();
-    if (L && L.next) items.unshift([`学習コース：<b>${esc(L.next.title)}</b>（${esc(L.next.module.title)}）`, `#learn/${L.next.id}`, L.next.min + "分"]);
+    if (L && L.next) items.unshift([`学習リソース：<b>${esc(L.next.title)}</b>（${esc(L.next.site)}）を読む`, "#learn", "学ぶ"]);
     if (focus) items.unshift([`重点スキル「<b>${esc(focus.name)}</b>」：次のレベル「${esc(focus.next)}」を意識して1日を過ごす`, "#assess", "意識"]);
     if (!lastA) items.unshift(["まずは<b>スキル自己診断</b>で現在地を知る", "#assess", "5分"]);
     $("#today-menu").innerHTML = items.map(([t, h, m]) => `<li><a href="${h}">${t}</a><span class="pill">${m}</span></li>`).join("");
@@ -170,6 +170,7 @@
           <h3>${f.name}</h3>
           <p>${f.summary}</p>
           <dl><dt>使う場面</dt><dd>${f.when}</dd><dt>落とし穴</dt><dd>${f.pitfall}</dd></dl>
+          ${f.ref ? `<p class="small ref"><a href="${f.ref[1]}" target="_blank" rel="noopener noreferrer">参考：${f.ref[0]} ↗</a></p>` : ""}
           <details><summary>練習問題</summary><p class="practice">${f.practice}</p><textarea rows="3" placeholder="ここに書いてみる（保存はされません）"></textarea></details>
         </article>`).join("");
     };

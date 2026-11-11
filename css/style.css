@@ -200,34 +200,33 @@ input[type=checkbox] { accent-color: var(--accent); width: 18px; height: 18px; v
 
 .site-footer { padding-bottom: 32px; text-align: center; }
 
-/* learn */
-.course-summary .progress { margin: 6px 0 16px; }
-.course-summary .btn { display: inline-block; text-decoration: none; }
-.module-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 18px; }
-.module { margin: 0; }
-.module .eyebrow { margin-bottom: 4px; }
-.module h2 { font-size: 1.2rem; margin-bottom: 4px; }
-.module .progress { margin: 10px 0 6px; }
-.lesson-list { list-style: none; margin: 0; padding: 0; }
-.lesson-list li { display: flex; align-items: center; justify-content: space-between; gap: 8px; border-bottom: 1px dashed var(--line); }
-.lesson-list li:last-child { border-bottom: 0; }
-.lesson-list a { display: flex; gap: 10px; align-items: center; padding: 10px 0; color: var(--ink); text-decoration: none; flex: 1; min-width: 0; }
-.lesson-list a:hover span:last-child { color: var(--accent); text-decoration: underline; }
-.lesson-list .pill { float: none; margin: 0; flex-shrink: 0; }
-.check { flex-shrink: 0; width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--line); display: grid; place-items: center; font-size: .75rem; font-weight: 700; }
-.lesson-list li.done .check { background: var(--good); border-color: var(--good); color: var(--surface); }
-.lesson-list li.done a { color: var(--muted); }
-.crumbs { margin-bottom: 12px; color: var(--muted); }
-.lesson { max-width: 760px; margin: 0 auto; padding: 28px clamp(18px, 4vw, 40px); }
-.lesson-title { font-size: clamp(1.5rem, 4vw, 2rem); }
-.lesson > p { font-size: 1.02rem; }
-.keypoints, .example, .action, .lesson-check { border-radius: 10px; padding: 14px 18px; margin: 20px 0; }
-.keypoints { background: var(--soft); }
-.keypoints ul { margin: 0; padding-left: 1.2em; }
-.keypoints h3, .example h3, .action h3, .lesson-check h3 { font-size: .85rem; letter-spacing: .08em; color: var(--gold); margin-bottom: 6px; }
-.example { border-left: 3px solid var(--accent); background: var(--bg); }
-.example p, .action p { margin: 0; }
-.lesson-check { border: 1px solid var(--line); }
-.action { border: 1.5px dashed var(--gold); }
-.lesson-foot .spacer { flex: 1; }
-.lesson-foot a.btn { text-decoration: none; }
+/* learn: external resources */
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.course-summary .progress { margin: 6px 0 14px; }
+.next-label { margin: 0 0 2px; }
+.next-link { font-weight: 700; text-decoration: none; }
+.next-link:hover { text-decoration: underline; }
+.res-group .progress { margin: 4px 0 8px; }
+.res-group > p { margin: 0 0 8px; }
+.res-list { list-style: none; margin: 0; padding: 0; }
+.res { display: flex; gap: 16px; align-items: flex-start; padding: 14px 0; border-top: 1px dashed var(--line); }
+.res-main { flex: 1; min-width: 0; }
+.res-title { font-weight: 700; text-decoration: none; overflow-wrap: anywhere; }
+.res-title:hover { text-decoration: underline; }
+.res-meta { margin: 4px 0; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.res-meta .tag { margin: 0; }
+.tag.cost { color: var(--good); }
+.tag.muted-tag { color: var(--muted); font-weight: 500; }
+.res-use { margin: 0 0 6px; }
+.res details summary { cursor: pointer; color: var(--accent); }
+.res textarea { font-size: .9rem; }
+.res-check { flex-shrink: 0; margin: 2px 0 0; display: flex; align-items: center; cursor: pointer; white-space: nowrap; }
+.res.done .res-title { color: var(--muted); }
+@media (max-width: 520px) { .res { flex-direction: column; gap: 6px; } }
+.ref-list { list-style: none; padding: 0; margin: 8px 0 0; }
+.ref-list li { padding: 8px 0; border-top: 1px dashed var(--line); display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; }
+.fw .ref { margin: 0 0 10px; }
+@media (max-width: 640px) {
+  .filters { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+  .chip { white-space: nowrap; flex-shrink: 0; }
+}
