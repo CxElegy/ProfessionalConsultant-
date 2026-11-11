@@ -29,6 +29,7 @@
     state.quiz.forEach((a) => set.add(a.date));
     state.kpt.forEach((a) => set.add(a.date));
     Object.entries(state.habits).forEach(([d, arr]) => { if (arr.length) set.add(d); });
+    if (window.DojoLearn) window.DojoLearn.doneDates().forEach((d) => set.add(d));
     return set;
   }
   function streak() {
@@ -42,6 +43,7 @@
 
   /* ---------- routing ---------- */
   function show(tab) {
+    tab = (tab || "").split("/")[0];
     if (!$(`#tab-${tab}`)) tab = "home";
     $$(".tab").forEach((s) => (s.hidden = s.dataset.tab !== tab));
     $$(".nav a").forEach((a) => a.classList.toggle("active", a.dataset.tab === tab));
@@ -64,7 +66,7 @@
     const stats = [
       ["連続日数", streak(), "日"],
       ["スキル平均", avg, lastA ? "/ 5" : ""],
-      ["ケース演習", state.cases.length, "回"],
+      ["学習コース", window.DojoLearn ? window.DojoLearn.summary().done : 0, window.DojoLearn ? "/ " + window.DojoLearn.summary().total : ""],
       ["クイズ最高", quizBest === null ? "—" : quizBest, quizBest === null ? "" : "/ 10"]
     ];
     $("#home-stats").innerHTML = stats.map(([l, v, u]) => `<div class="stat"><span class="stat-label">${l}</span><span class="stat-value">${v}<small>${u}</small></span></div>`).join("");
@@ -81,6 +83,8 @@
       [`ケース：<b>${esc(cs.title)}</b> の論点とイシューツリーを書く`, "#case", "15分"],
       ["KPTで今日の仕事を振り返る", "#habits", "3分"]
     ];
+    const L = window.DojoLearn && window.DojoLearn.summary();
+    if (L && L.next) items.unshift([`学習コース：<b>${esc(L.next.title)}</b>（${esc(L.next.module.title)}）`, `#learn/${L.next.id}`, L.next.min + "分"]);
     if (focus) items.unshift([`重点スキル「<b>${esc(focus.name)}</b>」：次のレベル「${esc(focus.next)}」を意識して1日を過ごす`, "#assess", "意識"]);
     if (!lastA) items.unshift(["まずは<b>スキル自己診断</b>で現在地を知る", "#assess", "5分"]);
     $("#today-menu").innerHTML = items.map(([t, h, m]) => `<li><a href="${h}">${t}</a><span class="pill">${m}</span></li>`).join("");
@@ -332,13 +336,14 @@
     renderLog();
 
     $("#export-btn").addEventListener("click", () => {
-      const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+      const blob = new Blob([JSON.stringify(Object.assign({}, state, { learn: window.DojoLearn ? window.DojoLearn.data() : null }), null, 2)], { type: "application/json" });
       const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `consultant-dojo-${today()}.json`; a.click();
       setTimeout(() => URL.revokeObjectURL(a.href), 1000);
     });
     $("#reset-btn").addEventListener("click", () => {
       if (!confirm("すべての記録を削除します。よろしいですか？")) return;
-      state = { assessments: [], cases: [], fermi: [], quiz: [], habits: {}, kpt: [] }; save(); location.reload();
+      state = { assessments: [], cases: [], fermi: [], quiz: [], habits: {}, kpt: [] }; save();
+      if (window.DojoLearn) window.DojoLearn.reset(); location.reload();
     });
   }
 
