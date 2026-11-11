@@ -3,207 +3,43 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Consultant Dojo</title>
-  <meta name="description" content="プロフェッショナルなコンサルタントになるための毎日のトレーニングサイト">
+  <title>Daily Card</title>
+  <meta name="description" content="1日1枚。外部の学習サイトで学び、要点を自分の言葉でカードにする。">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <header class="site-header">
-    <div class="wrap header-inner">
-      <a href="#home" class="brand"><span class="brand-mark">道</span><span>Consultant Dojo</span></a>
-      <button class="nav-toggle" aria-expanded="false" aria-controls="nav" aria-label="メニュー">☰</button>
-      <nav id="nav" class="nav">
-        <a href="#home" data-tab="home">ホーム</a>
-        <a href="#learn" data-tab="learn">学習リソース</a>
-        <a href="#assess" data-tab="assess">自己診断</a>
-        <a href="#frameworks" data-tab="frameworks">思考の型</a>
-        <a href="#case" data-tab="case">ケース練習</a>
-        <a href="#fermi" data-tab="fermi">フェルミ推定</a>
-        <a href="#quiz" data-tab="quiz">クイズ</a>
-        <a href="#habits" data-tab="habits">習慣・振り返り</a>
-      </nav>
-    </div>
+  <header class="wrap top">
+    <div class="brand"><span class="brand-mark">札</span><span>Daily Card</span></div>
+    <p class="date" id="date"></p>
   </header>
 
   <main class="wrap">
+    <section class="stats" id="stats" aria-label="記録"></section>
 
-    <!-- HOME -->
-    <section id="tab-home" class="tab" data-tab="home">
-      <div class="hero">
-        <p class="eyebrow">毎日15分、プロの思考を鍛える</p>
-        <h1>考える力は、<br>型と反復でつくられる。</h1>
-        <p class="lead">論点設定、構造化、仮説思考、数字感覚、伝える力。一流のコンサルタントに必要な力を、診断・型の学習・実践演習・振り返りのサイクルで鍛えます。</p>
-      </div>
-
-      <div class="stats" id="home-stats"></div>
-
-      <div class="card today">
-        <div class="card-head">
-          <h2>今日のメニュー</h2>
-          <span class="muted" id="today-date"></span>
-        </div>
-        <ol class="menu-list" id="today-menu"></ol>
-      </div>
-
-      <div class="grid-2">
-        <div class="card">
-          <h2>今日の一言</h2>
-          <blockquote id="daily-quote"></blockquote>
-        </div>
-        <div class="card">
-          <h2>トレーニングの回し方</h2>
-          <ol class="cycle">
-            <li><b>診断</b> — 月1回、8つのスキルを自己評価</li>
-            <li><b>学ぶ</b> — 学習リソースの外部サイトで基礎を学ぶ</li>
-            <li><b>型</b> — 思考のフレームワークを理解する</li>
-            <li><b>実践</b> — ケース・フェルミ・クイズで使う</li>
-            <li><b>振り返り</b> — KPTで学びを言語化する</li>
-          </ol>
-        </div>
-      </div>
+    <section aria-labelledby="today-h">
+      <h1 id="today-h" class="section-title">今日のカード</h1>
+      <div id="today"></div>
     </section>
 
-    <!-- LEARN -->
-    <section id="tab-learn" class="tab" data-tab="learn" hidden>
-      <div id="learn-root"></div>
-    </section>
-
-    <!-- ASSESS -->
-    <section id="tab-assess" class="tab" data-tab="assess" hidden>
-      <h1 class="page-title">スキル自己診断</h1>
-      <p class="lead">各スキルを1〜5で正直に評価してください。基準を読んで「今できていること」で判断するのがコツです。</p>
-      <div class="grid-2 assess-grid">
-        <form id="assess-form" class="card"></form>
-        <div class="card">
-          <h2>スキルレーダー</h2>
-          <div id="radar" class="radar"></div>
-          <div class="legend"><span class="swatch now"></span>今回 <span class="swatch prev"></span>前回</div>
-          <h3>重点強化スキル</h3>
-          <p id="focus-skill" class="muted">診断を保存すると表示されます。</p>
-        </div>
+    <section aria-labelledby="deck-h" class="deck-section">
+      <div class="deck-head">
+        <h2 id="deck-h" class="section-title">わたしのカード</h2>
+        <span class="muted small" id="deck-count"></span>
       </div>
+      <div class="dots" id="dots" aria-label="過去28日の記録"></div>
+      <div id="deck" class="deck"></div>
     </section>
-
-    <!-- FRAMEWORKS -->
-    <section id="tab-frameworks" class="tab" data-tab="frameworks" hidden>
-      <h1 class="page-title">思考の型</h1>
-      <p class="lead">型は「使える場面」と「落とし穴」まで知って初めて武器になります。各カードの練習問題に30秒で答えてみましょう。</p>
-      <div class="filters" id="fw-filters"></div>
-      <div class="fw-grid" id="fw-list"></div>
-    </section>
-
-    <!-- CASE -->
-    <section id="tab-case" class="tab" data-tab="case" hidden>
-      <h1 class="page-title">ケース練習</h1>
-      <p class="lead">実際のプロジェクト冒頭を想定した問いです。タイマーを回し、論点→構造→仮説→打ち手の順に書き出しましょう。</p>
-      <div class="card">
-        <div class="case-toolbar">
-          <select id="case-select" aria-label="ケースを選ぶ"></select>
-          <button class="btn ghost" id="case-random">ランダム</button>
-          <div class="timer" id="case-timer" aria-live="polite">15:00</div>
-          <button class="btn" id="case-timer-btn">開始</button>
-          <button class="btn ghost" id="case-timer-reset">リセット</button>
-        </div>
-        <div class="case-prompt" id="case-prompt"></div>
-        <div class="case-fields">
-          <label>① 真の論点（クライアントは本当は何を決めたいのか）<textarea data-field="issue" rows="2"></textarea></label>
-          <label>② 構造化（イシューツリー：MECEに分解）<textarea data-field="tree" rows="4"></textarea></label>
-          <label>③ 初期仮説（現時点の答え）<textarea data-field="hypo" rows="3"></textarea></label>
-          <label>④ 検証方法（どのデータで白黒つけるか）<textarea data-field="verify" rows="3"></textarea></label>
-          <label>⑤ 結論と打ち手（エレベーターピッチ30秒）<textarea data-field="so" rows="3"></textarea></label>
-        </div>
-        <div class="row">
-          <button class="btn" id="case-reveal">模範的な考え方を見る</button>
-          <button class="btn ghost" id="case-save">回答を保存</button>
-          <span class="muted" id="case-msg"></span>
-        </div>
-        <div id="case-model" class="model" hidden></div>
-      </div>
-      <div class="card">
-        <h2>本格的なケース練習（ファーム公式の教材）</h2>
-        <ul class="ref-list">
-          <li><a href="https://www.mckinsey.com/careers/interviewing" target="_blank" rel="noopener noreferrer">Interviewing at McKinsey ↗</a><span class="muted small">McKinsey｜英語｜解答例付きのサンプルケース</span></li>
-          <li><a href="https://careers.bcg.com/case-interview-preparation" target="_blank" rel="noopener noreferrer">Case Interview Preparation ↗</a><span class="muted small">BCG｜英語</span></li>
-          <li><a href="https://www.bain.com/ja/careers/hiring-process/case-interview/" target="_blank" rel="noopener noreferrer">ケース面接対策 ↗</a><span class="muted small">Bain & Company｜日本語</span></li>
-        </ul>
-      </div>
-    </section>
-
-    <!-- FERMI -->
-    <section id="tab-fermi" class="tab" data-tab="fermi" hidden>
-      <h1 class="page-title">フェルミ推定</h1>
-      <p class="lead">正確さより「分解の筋の良さ」と「桁の妥当性」が大切です。式を書いてから数字を入れましょう。</p>
-      <div class="card">
-        <div class="fermi-q" id="fermi-q"></div>
-        <label>分解の式<textarea id="fermi-formula" rows="3" placeholder="例：日本の世帯数 × 保有率 × 買替頻度"></textarea></label>
-        <label>あなたの推定値<input id="fermi-answer" type="text" inputmode="decimal" placeholder="数値（例：1200000）"></label>
-        <div class="row">
-          <button class="btn" id="fermi-check">答え合わせ</button>
-          <button class="btn ghost" id="fermi-next">次の問題</button>
-        </div>
-        <div id="fermi-result" class="model" hidden></div>
-      </div>
-      <div class="card">
-        <h2>覚えておきたい基礎数字</h2>
-        <ul class="numbers" id="fermi-numbers"></ul>
-        <p class="small muted">数字は概数です。最新値は必ず出典で確認してください。</p>
-        <ul class="ref-list">
-          <li><a href="https://www.stat.go.jp/data/jinsui/new.html" target="_blank" rel="noopener noreferrer">人口推計（最新） ↗</a><span class="muted small">総務省統計局</span></li>
-          <li><a href="https://www.stat.go.jp/data/nihon/index1.html" target="_blank" rel="noopener noreferrer">日本の統計 ↗</a><span class="muted small">総務省統計局｜基本統計の総合統計書</span></li>
-          <li><a href="https://mba.globis.ac.jp/about_mba/glossary/detail-20808.html" target="_blank" rel="noopener noreferrer">MBA用語集「フェルミ推定」 ↗</a><span class="muted small">グロービス経営大学院｜考え方の解説</span></li>
-        </ul>
-      </div>
-    </section>
-
-    <!-- QUIZ -->
-    <section id="tab-quiz" class="tab" data-tab="quiz" hidden>
-      <h1 class="page-title">実力クイズ</h1>
-      <p class="lead">プロの現場で問われる判断を10問。間違えた問題こそ、解説を読んで自分の言葉で説明できるようにしましょう。</p>
-      <div class="card" id="quiz-box"></div>
-    </section>
-
-    <!-- HABITS -->
-    <section id="tab-habits" class="tab" data-tab="habits" hidden>
-      <h1 class="page-title">習慣と振り返り</h1>
-      <div class="grid-2">
-        <div class="card">
-          <h2>今日のプロ習慣</h2>
-          <ul class="checklist" id="habit-list"></ul>
-          <div class="heat" id="habit-heat" aria-label="過去28日の達成状況"></div>
-          <p class="muted small">過去28日の達成数（濃いほど多い）</p>
-        </div>
-        <form class="card" id="kpt-form">
-          <h2>KPT 振り返り</h2>
-          <label>Keep（良かった・続けること）<textarea name="keep" rows="2" required></textarea></label>
-          <label>Problem（課題・うまくいかなかったこと）<textarea name="problem" rows="2"></textarea></label>
-          <label>Try（次に試すこと・具体的に）<textarea name="try" rows="2"></textarea></label>
-          <button class="btn" type="submit">記録する</button>
-        </form>
-      </div>
-      <div class="card">
-        <div class="card-head">
-          <h2>振り返りログ</h2>
-          <div class="row">
-            <button class="btn ghost small" id="export-btn">データを書き出す</button>
-            <button class="btn ghost small danger" id="reset-btn">全データ削除</button>
-          </div>
-        </div>
-        <div id="kpt-log"></div>
-      </div>
-    </section>
-
   </main>
 
-  <footer class="site-footer wrap">
-    <p class="muted small">データはこのブラウザ内にのみ保存されます。</p>
+  <footer class="wrap foot">
+    <p class="small muted">学習内容は各リンク先のサイトが提供しています。リンク先の内容・料金は変わることがあります（2026年11月時点で掲載を確認）。記録はこのブラウザ内にのみ保存されます。</p>
+    <p class="small"><button class="link-btn" id="export">記録を書き出す</button></p>
   </footer>
 
-  <script src="js/data.js"></script>
   <script src="js/resources.js"></script>
-  <script src="js/learn.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
